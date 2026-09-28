@@ -1,0 +1,43 @@
+{
+  "components": {
+    "selectable-list": {
+      "properties": [
+        {
+          "name": "options",
+          "label": "Options",
+          "fieldType": "json",
+          "defaultValue": "[]",
+          "description": "Array of options: [{ id, label, checked, disabled, readonly }].",
+          "required": false,
+          "typeMetadata": { "schema": { "type": "array" } }
+        },
+        {
+          "name": "readOnly",
+          "label": "Read only",
+          "fieldType": "boolean",
+          "defaultValue": false,
+          "description": "When true, renders the list as a non-interactive read-only view.",
+          "required": false,
+          "typeMetadata": { "schema": { "type": "boolean" } }
+        }
+      ],
+      "actions": [
+        {
+          "name": "MY_SELECTABLE_LIST#VALUE_SELECTED",
+          "label": "Value selected",
+          "description": "Dispatched when a user selects a new option.",
+          "payload": [
+            { "name": "value", "label": "Selected value", "fieldType": "string" },
+            { "name": "option", "label": "Selected option", "fieldType": "json" }
+          ]
+        }
+      ],
+      "uiBuilder": {
+        "label": "Selectable List",
+        "icon": "document",
+        "description": "Select one option from a list using a radio-group that immediately emits the selection.",
+        "category": "primitives"
+      }
+    }
+  }
+}
