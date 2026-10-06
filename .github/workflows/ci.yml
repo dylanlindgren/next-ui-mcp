@@ -14,11 +14,26 @@ jobs:
         # float forward automatically so this never needs bumping by hand.
         node-version: ['18.20', 'lts/*', 'current']
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+
+      # Install and build with a modern Node, regardless of the matrix leg.
+      # pnpm itself requires Node >=22.13 to run at all — that's a toolchain
+      # requirement, separate from the Node versions next-ui-mcp supports at
+      # runtime once built.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+
+      # Now switch to the matrix leg's Node version and run the compiled
+      # tests directly — no pnpm involved here, so this is free to run on
+      # the declared engines floor even though pnpm itself can't.
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+
+      - run: node --test dist/lib/*.test.js

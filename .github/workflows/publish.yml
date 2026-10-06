@@ -13,7 +13,7 @@ jobs:
       contents: read
       id-token: write # required for OIDC trusted publishing + provenance
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Verify release tag matches package.json version
         run: |
@@ -24,9 +24,9 @@ jobs:
             exit 1
           fi
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: lts/*
           registry-url: https://registry.npmjs.org
