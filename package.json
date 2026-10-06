@@ -1,6 +1,6 @@
 {
   "name": "next-ui-mcp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "MCP server for building ServiceNow Now/Next Experience UI Framework (@servicenow/ui-core) components — component patterns and now-ui.json manifest sync checking. Unofficial, community-maintained, not affiliated with or endorsed by ServiceNow.",
   "type": "module",
   "main": "dist/index.js",
