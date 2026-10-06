@@ -3,6 +3,16 @@ export interface InstanceConfig {
   authHeader: string;
 }
 
+const DEFAULT_REQUEST_TIMEOUT_MS = 20_000;
+
+function resolveRequestTimeoutMs(): number {
+  const raw = process.env.NEXT_UI_INSTANCE_TIMEOUT_MS;
+  if (!raw) return DEFAULT_REQUEST_TIMEOUT_MS;
+
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_REQUEST_TIMEOUT_MS;
+}
+
 /**
  * Reads the target ServiceNow instance's URL and credentials from environment
  * variables ONLY — never from tool-call arguments — so they never pass through
@@ -57,12 +67,26 @@ export async function tableApiGet(
     url.searchParams.set(key, value);
   }
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: config.authHeader,
-      Accept: 'application/json'
+  const timeoutMs = resolveRequestTimeoutMs();
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        Authorization: config.authHeader,
+        Accept: 'application/json'
+      },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      throw new Error(
+        `Instance request to ${config.baseUrl} timed out after ${timeoutMs}ms for ${table}. ` +
+          'Set NEXT_UI_INSTANCE_TIMEOUT_MS to raise this if the instance is just slow.'
+      );
     }
-  });
+    throw error;
+  }
 
   if (!response.ok) {
     const body = await response.text();

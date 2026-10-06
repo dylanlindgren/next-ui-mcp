@@ -1,6 +1,24 @@
-import type { ComponentApiAction, ComponentApiProperty, InstanceComponentApi } from './fetchComponentApi.js';
-import { HDS_COMPONENTS, getHdsComponent } from './hdsComponentRegistry.js';
+import { getHdsComponent } from './hdsComponentRegistry.js';
 import { getInstanceConfig, tableApiGet } from './instanceClient.js';
+
+export interface ComponentApiProperty {
+  name: string;
+  type?: string;
+  description?: string;
+  source: 'attr' | 'prop' | 'macroponent';
+}
+
+export interface ComponentApiAction {
+  name: string;
+  description?: string;
+}
+
+export interface InstanceComponentApi {
+  tag: string;
+  sysId: string;
+  properties: ComponentApiProperty[];
+  actions: ComponentApiAction[];
+}
 
 export interface InstanceComponentCatalogEntry extends InstanceComponentApi {}
 
@@ -8,7 +26,6 @@ export interface InstanceCatalogSearchOptions {
   query?: string;
   propertyName?: string;
   actionName?: string;
-  includeDeprecated?: boolean;
   limit?: number;
 }
 
@@ -22,15 +39,20 @@ export interface InstanceComponentRecommendationInput {
   useCase?: string;
   desiredProperties?: string[];
   desiredEvents?: string[];
-  includeDeprecated?: boolean;
   limit?: number;
 }
 
 const CATALOG_CACHE_TTL_MS = 60_000;
 const COMPONENT_PAGE_SIZE = 1000;
 const CHILD_PAGE_SIZE = 10000;
-const COMPONENT_QUERY_CHUNK_SIZE = 25;
+const SYS_ID_QUERY_CHUNK_SIZE = 25;
 const EVENT_QUERY_CHUNK_SIZE = 50;
+
+// Discovers every non-deprecated public HDS component on the instance directly, rather than
+// only the tags already known to the curated HDS_COMPONENTS registry below. The registry still
+// supplies package names and search terms for tags it knows, but it no longer gates which
+// components the live catalog can see.
+const DISCOVERY_QUERY = 'deprecated=false^ORdeprecatedISNULL^tagSTARTSWITHnow';
 
 type CacheEntry = {
   expiresAt: number;
@@ -145,52 +167,39 @@ async function tableApiGetAll(
 }
 
 async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
+  const componentRows = await tableApiGetAll(
+    'sys_ux_lib_component',
+    {
+      sysparm_query: DISCOVERY_QUERY,
+      sysparm_fields: 'sys_id,tag',
+      sysparm_display_value: 'all'
+    },
+    COMPONENT_PAGE_SIZE
+  );
+
   const componentMap = new Map<string, InstanceComponentCatalogEntry>();
-  for (const registeredComponent of HDS_COMPONENTS) {
-    componentMap.set(registeredComponent.tag, {
-      tag: registeredComponent.tag,
-      sysId: '',
-      deprecated: false,
+  const tagBySysId = new Map<string, string>();
+  const componentSysIds: string[] = [];
+
+  for (const component of componentRows as any[]) {
+    const sysId = rawValue(component.sys_id);
+    const tag = displayValue(component.tag);
+    if (!sysId || !tag || componentMap.has(tag)) continue;
+
+    componentMap.set(tag, {
+      tag,
+      sysId,
       properties: [],
       actions: []
     });
-  }
-
-  const componentTags = HDS_COMPONENTS.map((component) => component.tag);
-  const components = (
-    await Promise.all(
-      chunkArray(componentTags, COMPONENT_QUERY_CHUNK_SIZE).map((tagChunk) =>
-        tableApiGetAll(
-          'sys_ux_lib_component',
-          {
-            sysparm_query: `tagIN${tagChunk.join(',')}`,
-            sysparm_fields: 'sys_id,tag,deprecated',
-            sysparm_display_value: 'all'
-          },
-          COMPONENT_PAGE_SIZE
-        )
-      )
-    )
-  ).flat();
-
-  const componentSysIds: string[] = [];
-  for (const component of components as any[]) {
-    const sysId = rawValue(component.sys_id);
-    const tag = displayValue(component.tag);
-    if (!sysId || !tag) continue;
-
-    const entry = componentMap.get(tag);
-    if (!entry) continue;
-
-    entry.sysId = sysId;
-    entry.deprecated = component.deprecated === 'true' || component.deprecated === true;
+    tagBySysId.set(sysId, tag);
     componentSysIds.push(sysId);
   }
 
   const macroponents = componentSysIds.length
     ? (
         await Promise.all(
-          chunkArray(componentSysIds, COMPONENT_QUERY_CHUNK_SIZE).map((sysIdChunk) =>
+          chunkArray(componentSysIds, SYS_ID_QUERY_CHUNK_SIZE).map((sysIdChunk) =>
             tableApiGetAll(
               'sys_ux_macroponent',
               {
@@ -240,7 +249,8 @@ async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
     const sysId = rawValue(macroponent.root_component);
     if (!sysId) continue;
 
-    const component = [...componentMap.values()].find((entry) => entry.sysId === sysId);
+    const tag = tagBySysId.get(sysId);
+    const component = tag ? componentMap.get(tag) : undefined;
     if (!component) continue;
 
     for (const prop of parseJsonArray(rawValue(macroponent.props))) {
@@ -336,10 +346,6 @@ function scoreComponent(
   component: InstanceComponentCatalogEntry,
   options: InstanceCatalogSearchOptions
 ): InstanceComponentSearchResult | null {
-  if (!options.includeDeprecated && component.deprecated) {
-    return null;
-  }
-
   let score = 0;
   const reasons: string[] = [];
   const haystack = buildMatchText(component);
@@ -382,7 +388,7 @@ function scoreComponent(
   }
 
   if (!options.query && !options.propertyName && !options.actionName) {
-    score = component.deprecated ? 0 : 1;
+    score = 1;
   }
 
   if (score === 0 && (options.query || options.propertyName || options.actionName)) {
@@ -414,7 +420,6 @@ export async function recommendInstanceComponents(
   const useCaseTokens = tokenize(input.useCase ?? '');
 
   const results = catalog
-    .filter((component) => input.includeDeprecated || !component.deprecated)
     .map((component) => {
       let score = 0;
       const reasons: string[] = [];
@@ -443,7 +448,7 @@ export async function recommendInstanceComponents(
       }
 
       if (desiredProperties.length === 0 && desiredEvents.length === 0 && useCaseTokens.length === 0) {
-        score = component.deprecated ? 0 : 1;
+        score = 1;
       }
 
       return { component, score, reasons };

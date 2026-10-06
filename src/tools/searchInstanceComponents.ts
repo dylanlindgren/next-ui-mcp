@@ -11,12 +11,11 @@ export function registerSearchInstanceComponents(server: McpServer) {
       query: z.string().optional().describe('Free-text query to match against component tags and known properties/events.'),
       propertyName: z.string().optional().describe('Require components that expose a specific property name.'),
       actionName: z.string().optional().describe('Require components that dispatch a specific event/action name.'),
-      includeDeprecated: z.boolean().optional().describe('Include deprecated components in results. Defaults to false.'),
       limit: z.number().int().min(1).max(100).optional().describe('Maximum number of results to return. Defaults to 25.')
     },
-    async ({ query, propertyName, actionName, includeDeprecated, limit }) => {
+    async ({ query, propertyName, actionName, limit }) => {
       try {
-        const results = await searchInstanceComponents({ query, propertyName, actionName, includeDeprecated, limit });
+        const results = await searchInstanceComponents({ query, propertyName, actionName, limit });
 
         if (results.length === 0) {
           return {
@@ -27,12 +26,11 @@ export function registerSearchInstanceComponents(server: McpServer) {
         const lines: string[] = ['Matching HDS components:'];
         for (const result of results) {
           const component = result.component;
-          const deprecated = component.deprecated ? ' (DEPRECATED)' : '';
           const metadata = component.sysId
             ? `${component.properties.length} properties, ${component.actions.length} events`
             : 'live instance metadata unavailable';
           lines.push(
-            `- ${component.tag}${deprecated} — ${metadata}` +
+            `- ${component.tag} — ${metadata}` +
               (result.reasons.length > 0 ? ` | ${result.reasons.join('; ')}` : '')
           );
         }

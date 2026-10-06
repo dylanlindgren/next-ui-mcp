@@ -46,16 +46,14 @@ export function registerEvaluatePlatformComponentFit(server: McpServer) {
     {
       useCase: z.string().describe('Short description of the UI need, such as "inline label/value pair with tooltip".'),
       desiredProperties: z.array(z.string()).optional().describe('Optional list of properties the component should expose.'),
-      desiredEvents: z.array(z.string()).optional().describe('Optional list of dispatched events the component should expose.'),
-      includeDeprecated: z.boolean().optional().describe('Include deprecated HDS components in the evaluation. Defaults to false.')
+      desiredEvents: z.array(z.string()).optional().describe('Optional list of dispatched events the component should expose.')
     },
-    async ({ useCase, desiredProperties, desiredEvents, includeDeprecated }) => {
+    async ({ useCase, desiredProperties, desiredEvents }) => {
       try {
         const results = await recommendInstanceComponents({
           useCase,
           desiredProperties,
           desiredEvents,
-          includeDeprecated,
           limit: 5
         });
 

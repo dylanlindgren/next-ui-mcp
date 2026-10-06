@@ -63,6 +63,8 @@ Add to your MCP client config (for example, `.mcp.json` at your project root for
 
 Ensure the file is added to your `.gitignore` since it contains credentials.
 
+Instance requests time out after 20 seconds by default. Set `NEXT_UI_INSTANCE_TIMEOUT_MS` in the same `env` block to raise or lower that if your instance is slow or you want to fail faster.
+
 ## Development
 
 ```bash

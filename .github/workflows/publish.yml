@@ -1,0 +1,48 @@
+name: Publish to npm
+
+# Publishes the package whenever a GitHub Release is published.
+# Auth is via npm trusted publishing (OIDC) — no NPM_TOKEN secret required.
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for OIDC trusted publishing + provenance
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify release tag matches package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "Release tag $GITHUB_REF_NAME (version $TAG_VERSION) does not match package.json version $PKG_VERSION" >&2
+            exit 1
+          fi
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Builds dist/ and runs the test suite — the only gate here, since this
+      # workflow fires independently of ci.yml on release and could otherwise
+      # publish a commit that was never actually tested.
+      - run: pnpm test
+
+      # Trusted publishing requires a recent npm. setup-node ships an older one,
+      # so upgrade to a known-good pinned version that supports OIDC.
+      - run: npm install -g npm@11
+
+      # npm publish packs whatever matches the "files" allowlist in package.json
+      # (dist, guidance, README.md, LICENSE). pnpm test above is what produces dist/.
+      - run: npm publish

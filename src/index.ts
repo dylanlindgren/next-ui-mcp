@@ -11,10 +11,11 @@ import { registerRecommendInstanceComponents } from './tools/recommendInstanceCo
 import { registerSearchInstanceComponents } from './tools/searchInstanceComponents.js';
 import { registerResolveComponentPackage } from './tools/resolveComponentPackage.js';
 import { registerValidateNowUiManifest } from './tools/validateNowUiManifest.js';
+import pkg from '../package.json' with { type: 'json' }
 
 const server = new McpServer({
-  name: 'next-ui-mcp',
-  version: '0.1.0'
+  name: pkg.name,
+  version: pkg.version
 });
 
 registerExplainManifest(server);

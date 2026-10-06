@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { fetchComponentApi } from '../lib/fetchComponentApi.js';
+import { fetchInstanceComponentByTag } from '../lib/instanceCatalog.js';
 import { isKnownHdsComponentTag } from '../lib/hdsComponentRegistry.js';
 
 export function registerGetComponentApi(server: McpServer) {
@@ -22,7 +22,7 @@ export function registerGetComponentApi(server: McpServer) {
     },
     async ({ componentTag }: { componentTag: string }) => {
       try {
-        const api = await fetchComponentApi(componentTag);
+        const api = await fetchInstanceComponentByTag(componentTag);
 
         if (!api) {
           const knownTag = isKnownHdsComponentTag(componentTag);
@@ -39,7 +39,7 @@ export function registerGetComponentApi(server: McpServer) {
         }
 
         const lines: string[] = [];
-        lines.push(`Component: ${api.tag}${api.deprecated ? ' (DEPRECATED)' : ''}`, '');
+        lines.push(`Component: ${api.tag}`, '');
 
         lines.push('Properties:');
         if (api.properties.length === 0) {

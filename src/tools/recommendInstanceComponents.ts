@@ -11,16 +11,14 @@ export function registerRecommendInstanceComponents(server: McpServer) {
       useCase: z.string().optional().describe('Short description of the UI need, such as "button for launching a modal".'),
       desiredProperties: z.array(z.string()).optional().describe('Property names that the component should expose.'),
       desiredEvents: z.array(z.string()).optional().describe('Dispatched event names the component should expose.'),
-      includeDeprecated: z.boolean().optional().describe('Include deprecated components in recommendations. Defaults to false.'),
       limit: z.number().int().min(1).max(20).optional().describe('Maximum number of recommendations to return. Defaults to 5.')
     },
-    async ({ useCase, desiredProperties, desiredEvents, includeDeprecated, limit }) => {
+    async ({ useCase, desiredProperties, desiredEvents, limit }) => {
       try {
         const results = await recommendInstanceComponents({
           useCase,
           desiredProperties,
           desiredEvents,
-          includeDeprecated,
           limit
         });
 
@@ -33,12 +31,11 @@ export function registerRecommendInstanceComponents(server: McpServer) {
         const lines: string[] = ['Recommended HDS components:'];
         for (const result of results) {
           const component = result.component;
-          const deprecated = component.deprecated ? ' (DEPRECATED)' : '';
           const metadata = component.sysId
             ? `${component.properties.length} properties, ${component.actions.length} events`
             : 'live instance metadata unavailable';
           lines.push(
-            `- ${component.tag}${deprecated} — ${metadata}` +
+            `- ${component.tag} — ${metadata}` +
               (result.reasons.length > 0 ? ` | ${result.reasons.join('; ')}` : '')
           );
         }

@@ -1,6 +1,7 @@
 {
   "name": "next-ui-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "packageManager": "pnpm@11.5.2",
   "description": "MCP server for building ServiceNow Now/Next Experience UI Framework (@servicenow/ui-core) components — component patterns and now-ui.json manifest sync checking. Unofficial, community-maintained, not affiliated with or endorsed by ServiceNow.",
   "type": "module",
   "main": "dist/index.js",
@@ -14,11 +15,13 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=18.20"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
+    "pretest": "pnpm run build",
+    "test": "node --test dist/lib/*.test.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
