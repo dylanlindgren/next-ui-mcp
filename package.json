@@ -3,6 +3,10 @@
   "version": "1.0.1",
   "packageManager": "pnpm@11.5.2",
   "description": "MCP server for building ServiceNow Now/Next Experience UI Framework (@servicenow/ui-core) components — component patterns and now-ui.json manifest sync checking. Unofficial, community-maintained, not affiliated with or endorsed by ServiceNow.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dylanlindgren/next-ui-mcp.git"
+  },
   "type": "module",
   "main": "dist/index.js",
   "bin": {
