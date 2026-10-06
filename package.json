@@ -9,7 +9,7 @@
   },
   "files": [
     "dist",
-    "examples",
+    "guidance",
     "README.md",
     "LICENSE"
   ],
@@ -36,6 +36,7 @@
     "@babel/parser": "^7.25.0",
     "@babel/traverse": "^7.25.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "@servicenow/component-schema-validation": "^2.0.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
