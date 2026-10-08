@@ -65,6 +65,56 @@ Ensure the file is added to your `.gitignore` since it contains credentials.
 
 Instance requests time out after 20 seconds by default. Set `NEXT_UI_INSTANCE_TIMEOUT_MS` in the same `env` block to raise or lower that if your instance is slow or you want to fail faster.
 
+### Configure project instructions
+
+Connecting the server makes its tools available, but project instructions tell the agent when to use them. Add these files to the consuming UI project's root, and commit them so the team shares the same policy.
+
+Keep the shared instructions in `AGENTS.md`:
+
+```markdown
+# ServiceNow UI Development
+
+## HDS Policy
+
+Prefer HDS components over custom equivalents.
+Prefer composition or thin wrappers when an HDS component is a partial fit.
+Custom UI requires a concrete functional or design gap.
+
+## Required Workflow
+
+For new UI and substantial changes to existing UI:
+- Before implementation, use next-ui-mcp get_framework_guidance
+  with topic "agent-workflow-contract" and follow its guidance.
+- Discover HDS candidates using recommend_instance_components
+  or search_instance_components.
+- Evaluate plausible candidates with evaluate_platform_component_fit.
+- Inspect selected components with get_component_api before using them.
+- Follow MCP guidance for imports and instance-backed dependencies.
+- Briefly explain any decision to create a custom equivalent.
+- If MCP tools are unavailable or fail, report the limitation.
+  Do not interpret failed discovery as proof that no HDS component exists.
+```
+
+Adjust the HDS policy to match the project:
+
+- **Strict:** Use suitable HDS components; custom equivalents require a concrete capability gap.
+- **Preferred:** Start with HDS; allow custom UI for documented functional or design requirements. This is the template's default.
+- **Selective:** Specify which controls or areas must use HDS and where custom UI is acceptable. Keep that scope consistent with the required workflow.
+
+For **Copilot in VS Code**, enable `chat.useAgentsMdFile` for the Local agent. Start a new chat and confirm `AGENTS.md` is discovered in **Chat: Open Customizations** and included in the response's References or instruction diagnostics. Merge this guidance with any existing project instructions instead of adding conflicting policies.
+
+For **Claude Code**, add a root `CLAUDE.md` containing this import as a plain Markdown line, not inside a code fence:
+
+```markdown
+@AGENTS.md
+```
+
+Claude Code expands the import automatically, keeping `AGENTS.md` as the single source of shared instructions. Recent versions can also load `AGENTS.md` directly, but the import supports older versions and sessions configured to load only `CLAUDE.md`. If `CLAUDE.md` already exists, add the import and preserve its existing instructions. Start a new session and use `/context` to confirm the project instructions loaded.
+
+Configure and enable the MCP server separately in each client; instruction files do not connect it. Choosing a Claude model inside Copilot still uses Copilot's instruction loading, not Claude Code's.
+
+To check the workflow, ask the agent to add a card containing a button. Verify that it calls component-discovery and API-inspection tools before implementing the UI. Instructions guide behavior but do not guarantee compliance.
+
 ## Development
 
 ```bash
