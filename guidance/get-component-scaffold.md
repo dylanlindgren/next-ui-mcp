@@ -19,7 +19,7 @@ The scaffold must include:
 
 1. Prefer JSX for new projects.
 2. Use `className`, never `class`.
-3. Use local runtime shims instead of direct imports from `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom`.
+3. Use local runtime shims backed by `@servicenow/ui-mega`. The shims must import `servicenowUiCore` and `servicenowUiRendererSnabbdom` from that package, as shown in the scaffold. Neither component source nor shim files may import or re-export from `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom`; merely wrapping those original packages in local files is not compliant.
 4. Prefer an existing HDS component such as `now-card` before creating a custom card or wrapper.
 5. If you use any HDS component in JSX, import the matching package, for example `import '@servicenow/now-card';`.
 6. Keep styles in a separate `.scss` file and set them via the `styles` property on `createCustomElement(...)`.
