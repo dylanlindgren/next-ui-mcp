@@ -18,6 +18,8 @@ export interface InstanceComponentApi {
   sysId: string;
   properties: ComponentApiProperty[];
   actions: ComponentApiAction[];
+  slots: string[];
+  hasDefaultSlot: boolean;
 }
 
 export interface InstanceComponentCatalogEntry extends InstanceComponentApi {}
@@ -91,6 +93,21 @@ function parseGlideList(value: string | undefined): string[] {
         .map((entry) => entry.trim())
         .filter(Boolean)
     : [];
+}
+
+function parseAvailableSlots(value: string | undefined): string[] {
+  if (!value) return [];
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object' || !('availableSlots' in parsed)) return [];
+    const slots = parsed.availableSlots;
+    return Array.isArray(slots)
+      ? slots.filter((slot): slot is string => typeof slot === 'string' && slot.length > 0)
+      : [];
+  } catch {
+    return [];
+  }
 }
 
 function chunkArray<T>(items: T[], size: number): T[][] {
@@ -190,7 +207,9 @@ async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
       tag,
       sysId,
       properties: [],
-      actions: []
+      actions: [],
+      slots: [],
+      hasDefaultSlot: false
     });
     tagBySysId.set(sysId, tag);
     componentSysIds.push(sysId);
@@ -204,7 +223,7 @@ async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
               'sys_ux_macroponent',
               {
                 sysparm_query: `root_componentIN${sysIdChunk.join(',')}`,
-                sysparm_fields: 'root_component,props,dispatched_events',
+                sysparm_fields: 'root_component,props,dispatched_events,root_component_definition',
                 sysparm_display_value: 'all'
               },
               CHILD_PAGE_SIZE
@@ -253,6 +272,10 @@ async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
     const component = tag ? componentMap.get(tag) : undefined;
     if (!component) continue;
 
+    const slots = parseAvailableSlots(rawValue(macroponent.root_component_definition));
+    component.slots.push(...slots.filter((slot) => slot !== '@default'));
+    component.hasDefaultSlot ||= slots.includes('@default');
+
     for (const prop of parseJsonArray(rawValue(macroponent.props))) {
       const name = typeof prop?.name === 'string' ? prop.name : undefined;
       if (!name) continue;
@@ -292,7 +315,8 @@ async function loadCatalog(): Promise<InstanceComponentCatalogEntry[]> {
     .map((component) => ({
       ...component,
       properties: dedupeProperties(component.properties),
-      actions: dedupeActions(component.actions)
+      actions: dedupeActions(component.actions),
+      slots: [...new Set(component.slots)]
     }))
     .sort((left, right) => left.tag.localeCompare(right.tag));
 }
