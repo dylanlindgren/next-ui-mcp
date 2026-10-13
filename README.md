@@ -32,6 +32,7 @@ This MCP server is meant to act as a practical operating system for working with
 
 - **`evaluate_platform_component_fit`** — decides whether an instance-backed HDS component should be used directly, wrapped/composed, or replaced with a custom implementation before scaffolding from scratch.
 - **`search_instance_components`** — discovers which platform components exist on the configured instance.
+- **`search_instance_icons`** — searches the icon library on the configured instance (the values accepted by `icon` properties such as `now-button`'s) so agents pick real icon names instead of guessing. Names are read from the instance's `now-icon` package; append `-outline` or `-fill` to use one.
 - **`recommend_instance_components`** — finds likely platform-component matches from a use case or desired properties/events.
 - **`resolve_component_package`** — resolves a platform component tag to the exact npm package it belongs to without guessing.
 

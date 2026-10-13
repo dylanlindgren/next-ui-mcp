@@ -56,6 +56,36 @@ export function getInstanceConfig(): InstanceConfig {
   return { baseUrl: trimmedBaseUrl, authHeader: `Basic ${basic}` };
 }
 
+async function instanceFetch(config: InstanceConfig, url: URL, accept: string, label: string): Promise<Response> {
+  const timeoutMs = resolveRequestTimeoutMs();
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        Authorization: config.authHeader,
+        Accept: accept
+      },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+      throw new Error(
+        `Instance request to ${config.baseUrl} timed out after ${timeoutMs}ms for ${label}. ` +
+          'Set NEXT_UI_INSTANCE_TIMEOUT_MS to raise this if the instance is just slow.'
+      );
+    }
+    throw error;
+  }
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Instance request failed (${response.status}) for ${label}: ${body.slice(0, 300)}`);
+  }
+
+  return response;
+}
+
 /** GETs a ServiceNow Table API resource and returns its `result` array. */
 export async function tableApiGet(
   config: InstanceConfig,
@@ -67,32 +97,14 @@ export async function tableApiGet(
     url.searchParams.set(key, value);
   }
 
-  const timeoutMs = resolveRequestTimeoutMs();
-
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      headers: {
-        Authorization: config.authHeader,
-        Accept: 'application/json'
-      },
-      signal: AbortSignal.timeout(timeoutMs)
-    });
-  } catch (error) {
-    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
-      throw new Error(
-        `Instance request to ${config.baseUrl} timed out after ${timeoutMs}ms for ${table}. ` +
-          'Set NEXT_UI_INSTANCE_TIMEOUT_MS to raise this if the instance is just slow.'
-      );
-    }
-    throw error;
-  }
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Instance request failed (${response.status}) for ${table}: ${body.slice(0, 300)}`);
-  }
-
+  const response = await instanceFetch(config, url, 'application/json', table);
   const json = (await response.json()) as { result?: any[] };
   return json.result ?? [];
+}
+
+/** GETs an arbitrary instance path (e.g. a /uxasset/... file) and returns the body as text. */
+export async function instanceGetText(config: InstanceConfig, path: string): Promise<string> {
+  const url = new URL(`${config.baseUrl}${path.startsWith('/') ? path : `/${path}`}`);
+  const response = await instanceFetch(config, url, '*/*', path);
+  return response.text();
 }
