@@ -1,3 +1,5 @@
+import { resolveSncProfileAuth } from './sncProfile.js';
+
 export interface InstanceConfig {
   baseUrl: string;
   authHeader: string;
@@ -25,15 +27,15 @@ function resolveRequestTimeoutMs(): number {
  *     "NEXT_UI_INSTANCE_PASSWORD": "..."
  *   }
  * or NEXT_UI_INSTANCE_TOKEN instead of USER/PASSWORD for bearer-token auth.
+ *
+ * If NEXT_UI_INSTANCE_URL is not set, falls back to an `snc configure profile` profile (macOS only):
+ * NEXT_UI_SNC_PROFILE selects it (default "default"); host/username come from ~/.snc/config.json and
+ * the password from the macOS Keychain, so no secret needs to live in the MCP client config.
  */
 export function getInstanceConfig(): InstanceConfig {
   const baseUrl = process.env.NEXT_UI_INSTANCE_URL;
   if (!baseUrl) {
-    throw new Error(
-      'NEXT_UI_INSTANCE_URL is not set. Configure NEXT_UI_INSTANCE_URL and either ' +
-        'NEXT_UI_INSTANCE_TOKEN, or both NEXT_UI_INSTANCE_USER and NEXT_UI_INSTANCE_PASSWORD, ' +
-        "as environment variables in your MCP client's server config."
-    );
+    return getSncProfileConfig();
   }
 
   const trimmedBaseUrl = baseUrl.replace(/\/+$/, '');
@@ -100,6 +102,22 @@ export async function tableApiGet(
   const response = await instanceFetch(config, url, 'application/json', table);
   const json = (await response.json()) as { result?: any[] };
   return json.result ?? [];
+}
+
+function getSncProfileConfig(): InstanceConfig {
+  const profile = process.env.NEXT_UI_SNC_PROFILE || 'default';
+  try {
+    const auth = resolveSncProfileAuth(profile);
+    const basic = Buffer.from(`${auth.user}:${auth.password}`).toString('base64');
+    return { baseUrl: auth.baseUrl, authHeader: `Basic ${basic}` };
+  } catch (error) {
+    throw new Error(
+      'NEXT_UI_INSTANCE_URL is not set and the snc profile fallback failed. Configure NEXT_UI_INSTANCE_URL and either ' +
+        'NEXT_UI_INSTANCE_TOKEN, or both NEXT_UI_INSTANCE_USER and NEXT_UI_INSTANCE_PASSWORD, ' +
+        "as environment variables in your MCP client's server config, or fix the snc profile. " +
+        `snc profile: ${(error as Error).message}`
+    );
+  }
 }
 
 /** GETs an arbitrary instance path (e.g. a /uxasset/... file) and returns the body as text. */

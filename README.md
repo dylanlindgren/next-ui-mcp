@@ -42,6 +42,14 @@ This MCP server is meant to act as a practical operating system for working with
 - **`analyze_project_dependencies`** — checks whether a project declares platform packages as `optionalDependencies` with version `"instance"` when needed.
 - **`validate_now_ui_manifest`** — validates a `now-ui.json` file using the ServiceNow schema validation package and reports schema issues.
 
+### Using an `snc` profile instead of environment credentials (macOS)
+
+If `NEXT_UI_INSTANCE_URL` is not set, the server falls back to an `snc configure profile` profile. Set `NEXT_UI_SNC_PROFILE` to pick one (default: `default`). The host and username are read from `~/.snc/config.json` and the password from the macOS Keychain (service `snc`, account = profile name), so no secret has to be stored in your MCP client config. Only `basic` login-method profiles are supported.
+
+```json
+"env": { "NEXT_UI_SNC_PROFILE": "default" }
+```
+
 ## Install
 
 Add to your MCP client config (for example, `.mcp.json` at your project root for Claude Code or `.cursor/mcp.json` for Cursor):
