@@ -1,24 +1,31 @@
 # Sample project structure
 
-Use this as the baseline scaffold for a local Now/Next Experience UI Framework component project.
+Use this as the baseline scaffold for a local Now/Next Experience UI Framework
+component project. New projects use `next-ui-storybook` as the default
+development and preview workflow.
+
+Default the registered custom-element name to the project's scope name converted
+to kebab-case, followed by the component name. For example, `scopeName:
+x_snc_abc123` and `my-component` produce `x-snc-abc123-my-component`. Pass the
+existing manifest's `scopeName` to `get_component_scaffold` and preserve that
+original value in `now-ui.json`. Component folder names may remain unprefixed.
 
 ```text
 {{projectName}}/
-  .mcp.json
+  .storybook/
+    main.mjs
   package.json
   now-ui.json
+  stories/
+    {{componentName}}.stories.js
   src/
     {{componentName}}/
       index.js
       view.js
       styles.scss
-    examples/
-      index.js
     runtime/
       ui-core.js
       snabbdom.js
-  example/
-    element.js
 ```
 
 Purpose of each part:
@@ -27,10 +34,15 @@ Purpose of each part:
 2. `package.json` should declare instance-backed HDS packages under `optionalDependencies` with version `"instance"` when the project depends on platform components.
 3. `src/{{componentName}}/index.js` registers the real custom element with `createCustomElement(...)`.
 4. `src/{{componentName}}/view.js` contains the view function so the render path stays separate from registration.
-5. `src/examples/index.js` is a dedicated smoke-test component for demo state and sample props.
-6. `src/{{componentName}}/styles.scss` holds the component stylesheet, imported into the component and declared via `styles` in `createCustomElement(...)`.
-7. `src/runtime/ui-core.js` and `src/runtime/snabbdom.js` are local framework shims.
-8. `example/element.js` is the local entry point used by `snc ui-component develop`.
+5. `src/{{componentName}}/styles.scss` holds the component stylesheet, imported into the component and declared via `styles` in `createCustomElement(...)`.
+6. `src/runtime/ui-core.js` and `src/runtime/snabbdom.js` are local framework shims.
+7. `.storybook/main.mjs` configures Storybook and the ServiceNow addon.
+8. `stories/{{componentName}}.stories.js` imports and previews the registered component.
+
+The Storybook addon requires Node.js 22 or newer and a ServiceNow instance for
+instance-backed previews. Assume the user already has an `snc` profile
+configured. Credential and profile configuration are the user's responsibility,
+not part of agent scaffolding.
 
 Minimal file pattern:
 
@@ -67,6 +79,73 @@ export default function view(state) {
 For new components with no existing repo style, prefer the JSX scaffold and do not hand-write low-level `createElement(...)` trees unless the repo already uses that pattern.
 
 ```json
+// package.json (merge these entries into the project manifest)
+{
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@dylanlindgren/next-ui-storybook-addon": "^1.0.0",
+    "@storybook/web-components-vite": "^10.6.2",
+    "react": "^18.3.1",
+    "sass": "1.53.0",
+    "storybook": "^10.6.2",
+    "vite": "^7.3.6"
+  }
+}
+```
+
+Use the package manager and compatible versions already established by the
+project where applicable. Do not replace the project's existing package
+manifest or lockfile wholesale.
+
+```js
+// .storybook/main.mjs
+/** @type {import('@storybook/web-components-vite').StorybookConfig} */
+export default {
+  framework: '@storybook/web-components-vite',
+  stories: ['../stories/**/*.stories.@(js|jsx|mjs)'],
+  addons: [
+    {
+      name: '@dylanlindgren/next-ui-storybook-addon',
+      options: {
+        componentSrcDir: 'src',
+      },
+    },
+  ],
+  core: { disableTelemetry: true },
+};
+```
+
+```js
+// stories/{{componentName}}.stories.js
+import '../src/{{componentName}}';
+
+const TAG = '{{elementTag}}';
+
+export default {
+  title: 'Components/{{label}}',
+  tags: ['autodocs'],
+  render: (args) => {
+    const element = document.createElement(TAG);
+    Object.assign(element, args);
+    return element;
+  },
+  argTypes: {
+    title: { control: 'text' },
+    status: { control: 'text' },
+  },
+  args: {
+    title: '{{label}}',
+    status: 'Healthy',
+  },
+};
+
+export const Default = {};
+```
+
+```json
 // package.json
 {
   "optionalDependencies": {
@@ -91,29 +170,6 @@ createCustomElement('{{elementTag}}', {
     status: {default: 'OK'}
   }
 });
-```
-
-```js
-// src/examples/index.js
-import '../{{componentName}}';
-
-export default function renderExamples(container) {
-  container.innerHTML = `
-    <{{elementTag}}
-      title="{{label}}"
-      status="Healthy"
-    ></{{elementTag}}>
-  `;
-}
-```
-
-```js
-// example/element.js
-import renderExamples from '../src/examples';
-
-const mountNode = document.createElement('div');
-document.body.appendChild(mountNode);
-renderExamples(mountNode);
 ```
 
 ```json
@@ -165,10 +221,12 @@ renderExamples(mountNode);
 
 Rules for agents:
 
-1. MUST NOT mount the production component directly from `example/element.js`; route through `src/examples/index.js`.
-2. MUST NOT import `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom` directly from the component source; use the local runtime shims. This is a required scaffold rule, not optional cleanup.
-3. MUST keep `createCustomElement(...)` and `now-ui.json` aligned whenever properties or dispatched events change.
-4. MUST use `search_instance_components` and `get_component_api` before building custom UI that might already exist as an HDS component. When a platform primitive like `now-card` exists, prefer it over a custom card implementation.
-5. MUST import the matching package for any HDS component used in JSX, not only `now-card`. Example: `import '@servicenow/now-button';` or `import '@servicenow/now-card';` before rendering the element.
-6. MUST keep component styles in a dedicated `.scss` file per component, import it, and declare it via the `styles` property in `createCustomElement(...)`; do not inline CSS in the view.
-7. MUST NOT run `snc ui-component develop` or `deploy` as part of agent scaffolding; create the structure and let the user run the CLI.
+1. MUST use Storybook with `@dylanlindgren/next-ui-storybook-addon` as the default local component preview workflow. Create or update a story for each component being previewed.
+2. MUST assess existing project configuration before setup or migration. Preserve compatible Storybook configuration, package scripts, lockfiles, existing stories, examples, and unrelated project instructions; make targeted additions instead of replacing files wholesale.
+3. MUST NOT import `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom` directly from the component source; use the local runtime shims. This is a required scaffold rule, not optional cleanup.
+4. MUST keep `createCustomElement(...)` and `now-ui.json` aligned whenever properties or dispatched events change.
+5. MUST use `search_instance_components` and `get_component_api` before building custom UI that might already exist as an HDS component. When a platform primitive like `now-card` exists, prefer it over a custom card implementation.
+6. MUST import the matching package for any HDS component used in JSX, not only `now-card`. Example: `import '@servicenow/now-button';` or `import '@servicenow/now-card';` before rendering the element.
+7. MUST keep component styles in a dedicated `.scss` file per component, import it, and declare it via the `styles` property in `createCustomElement(...)`; do not inline CSS in the view.
+8. MUST NOT use `snc ui-component develop` as the default preview workflow. Do not run `snc ui-component develop` or `deploy` as part of agent scaffolding or validation.
+9. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server. Give the user the preview command to run themselves. Agents may run the static `build-storybook` script for validation.

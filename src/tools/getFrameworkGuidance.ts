@@ -8,6 +8,7 @@ const GUIDANCE_TOPICS = [
   'agent-workflow-contract',
   'framework-basics',
   'local-development-entry',
+  'storybook-local-development',
   'sample-project-structure',
   'now-ui-manifest',
   'instance-backed-dependencies',
@@ -21,6 +22,7 @@ const GUIDANCE: Record<Exclude<GuidanceTopic, 'sample-project-structure'>, strin
   'agent-workflow-contract': readGuidanceFile('agent-workflow-contract'),
   'framework-basics': readGuidanceFile('framework-basics'),
   'local-development-entry': readGuidanceFile('local-development-entry'),
+  'storybook-local-development': readGuidanceFile('local-development-entry'),
   'now-ui-manifest': readGuidanceFile('now-ui-manifest'),
   'instance-backed-dependencies': readGuidanceFile('instance-backed-dependencies'),
   'platform-component-selection': readGuidanceFile('platform-component-selection')
@@ -57,6 +59,9 @@ function resolveTopic(topic?: string, question?: string): GuidanceTopic {
   if (query.includes('workflow contract') || query.includes('which mcp tools') || query.includes('used and why') || query.includes('tool usage')) {
     return 'agent-workflow-contract';
   }
+  if (query.includes('storybook') || query.includes('local preview') || query.includes('preview workflow')) {
+    return 'storybook-local-development';
+  }
   if (query.includes('element.js') || query.includes('example/') || query.includes('innerhtml') || query.includes('local development')) {
     return 'local-development-entry';
   }
@@ -82,7 +87,7 @@ function resolveTopic(topic?: string, question?: string): GuidanceTopic {
 export function registerGetFrameworkGuidance(server: McpServer) {
   server.tool(
     'get_framework_guidance',
-    'MANDATORY workflow guidance for ServiceNow Now/Next Experience UI Framework projects. For new components with no existing local style, MUST prefer the JSX scaffold returned by get_component_scaffold and MUST NOT hand-write low-level createElement trees unless the repo already uses that pattern. MUST prefer platform components such as now-card, now-button, and similar instance-backed HDS components before creating custom equivalents. MUST import the corresponding package for any HDS component used in JSX or markup, for example import "@servicenow/now-card" or import "@servicenow/now-button". MUST declare instance-backed platform packages in package.json under optionalDependencies with version "instance" rather than leaving them implicit. MUST also use the local runtime shims at src/runtime/ui-core.js and src/runtime/snabbdom.js for createCustomElement and the renderer. Runtime shims MUST import servicenowUiCore and servicenowUiRendererSnabbdom from @servicenow/ui-mega. Neither component source nor runtime shim files may import or re-export from @servicenow/ui-core or @servicenow/ui-renderer-snabbdom; wrapping those original packages in local files does not satisfy this requirement. JSX must use className instead of class, and styles must live in a separate .scss file per component, imported and declared on the component definition via the styles property. This tool includes the createCustomElement stub pattern, the agent workflow contract, the sample project structure, local development entry patterns, manifest rules, instance-backed dependency patterns, and the platform-component-first decision flow. When called without arguments, it defaults to create-custom-element guidance.',
+    'MANDATORY workflow guidance for ServiceNow Now/Next Experience UI Framework projects. MUST use next-ui-storybook with @dylanlindgren/next-ui-storybook-addon as the default local development and preview workflow. For existing projects, inspect their Storybook configuration, package scripts, stories, lockfile, and instructions before migrating; preserve compatible setup and make targeted changes rather than overwriting project files. For new components with no existing local style, MUST prefer the JSX scaffold returned by get_component_scaffold and MUST NOT hand-write low-level createElement trees unless the repo already uses that pattern. MUST prefer platform components such as now-card, now-button, and similar instance-backed HDS components before creating custom equivalents. MUST import the corresponding package for any HDS component used in JSX or markup, for example import "@servicenow/now-card" or import "@servicenow/now-button". MUST declare instance-backed platform packages in package.json under optionalDependencies with version "instance" rather than leaving them implicit. MUST also use the local runtime shims at src/runtime/ui-core.js and src/runtime/snabbdom.js for createCustomElement and the renderer. Runtime shims MUST import servicenowUiCore and servicenowUiRendererSnabbdom from @servicenow/ui-mega. Neither component source nor runtime shim files may import or re-export from @servicenow/ui-core or @servicenow/ui-renderer-snabbdom; wrapping those original packages in local files does not satisfy this requirement. JSX must use className instead of class, and styles must live in a separate .scss file per component, imported and declared on the component definition via the styles property. This tool includes the createCustomElement stub pattern, the agent workflow contract, the sample project structure, Storybook local-development and migration guidance, manifest rules, instance-backed dependency patterns, and the platform-component-first decision flow. When called without arguments, it defaults to create-custom-element guidance.',
     {
       topic: z.string().optional().describe('Optional guidance topic to retrieve directly.'),
       question: z.string().optional().describe('Optional free-text question used to choose the closest bundled guidance topic.')

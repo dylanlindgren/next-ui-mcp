@@ -10,8 +10,9 @@ Key rules:
 - Public component inputs live in the properties object passed to createCustomElement(...).
 - Public component outputs are the event names passed to dispatch(name, payload) when those events are meant for ServiceNow tooling or other external consumers.
 - now-ui.json is a separate manifest that should declare those publicly exposed properties and dispatched events for tooling such as UI Builder.
-- Local development entry for snc ui-component develop is typically ./example/element.js.
-- Each component project should include a dedicated examples component that is imported into example/element.js and mounted onto the page with innerHTML for quick smoke testing. Mounting the production component directly from example/element.js is not the expected scaffold.
+- `next-ui-storybook` with `@dylanlindgren/next-ui-storybook-addon` is the default local development and preview workflow.
+- Each new component should have a Storybook story that imports the component source and renders its custom-element tag with representative property args.
+- For an existing project, inspect its package manifest, scripts, Storybook config, stories, and instructions before migration. Preserve compatible setup and make targeted changes; do not replace user configuration wholesale.
 - Before hand-rolling new UI, inspect available platform components on the configured instance.
 - Treat the scaffold as incomplete until local runtime shims exist for @servicenow/ui-core and @servicenow/ui-renderer-snabbdom.
 
@@ -30,6 +31,6 @@ JSX note:
 
 Stub entry points:
 
-- Call `get_component_scaffold` for the full folder structure, runtime shims, `example/element.js`, and `now-ui.json` stub.
-- Use the `sample-project-structure` guidance topic when the agent needs the scaffold as guidance text.
+- Call `get_component_scaffold` for the full folder structure, runtime shims, Storybook config and story, and `now-ui.json` stub.
+- Use the `sample-project-structure` guidance topic when the agent needs the scaffold, or `storybook-local-development` for setup and migration guidance.
 - Use the `create-custom-element` guidance topic when the agent only needs the registration shape and runtime semantics.
