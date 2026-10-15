@@ -16,7 +16,7 @@ But the broader goal is to make AI-assisted development in this framework safer 
 - choose between direct use, composition, and custom implementation with evidence
 - validate manifests and dependency setup
 - inspect live instance API metadata instead of guessing from stale package docs
-- follow the correct local project conventions for `example/element.js`, runtime shims, and `optionalDependencies`
+- use `next-ui-storybook` as the default local preview workflow, alongside runtime shims and instance-backed `optionalDependencies`
 - reduce the common failure modes that cause AI-generated Next Experience UI Framework code to be structurally wrong or platform-incompatible
 
 This MCP server is meant to act as a practical operating system for working with Next Experience UI Framework projects in AI-assisted development, with manifest sync as one critical piece of that larger workflow.
@@ -25,8 +25,8 @@ This MCP server is meant to act as a practical operating system for working with
 ### Guidance and scaffolding
 
 - **`explain_now_ui_manifest`** — explains what `now-ui.json` is and how to keep it in sync with the component code.
-- **`get_framework_guidance`** — returns bundled guidance for framework patterns, sample project structure, `createCustomElement(...)`, manifest expectations, local development conventions, and instance-backed dependency usage.
-- **`get_component_scaffold`** — returns the minimal stub files for a new component, including `createCustomElement(...)`, `example/element.js`, and a matching `now-ui.json` entry.
+- **`get_framework_guidance`** — returns bundled guidance for framework patterns, sample project structure, `createCustomElement(...)`, manifest expectations, Storybook local development and migration, and instance-backed dependency usage. Use topic `storybook-local-development` for setup and adoption guidance.
+- **`get_component_scaffold`** — returns the minimal stub files for a new component, including `createCustomElement(...)`, `.storybook/main.mjs`, a component story, and a matching `now-ui.json` entry.
 
 ### Platform component selection
 

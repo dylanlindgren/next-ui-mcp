@@ -31,10 +31,10 @@ function renderTemplate(template: string, values: Record<string, string>): strin
 
 export function renderComponentScaffold(options: ComponentScaffoldOptions = {}): string {
   const componentName = normalizeSegment(options.componentName ?? 'my-component') || 'my-component';
-  const scopeName = normalizeSegment(options.scopeName ?? options.elementPrefix ?? 'my-scope') || 'my-scope';
-  const elementPrefix = normalizeSegment(options.elementPrefix ?? scopeName) || scopeName;
+  const scopeName = options.scopeName?.trim() || normalizeSegment(options.elementPrefix ?? 'my-scope') || 'my-scope';
+  const elementPrefix = normalizeSegment(options.elementPrefix ?? scopeName) || normalizeSegment(scopeName) || 'my-scope';
   const projectName = `${componentName}-project`;
-  const elementTag = `${elementPrefix}-${componentName}`;
+  const elementTag = componentName.startsWith(`${elementPrefix}-`) ? componentName : `${elementPrefix}-${componentName}`;
   const label = startCaseFromKebab(componentName);
 
   return renderTemplate(SCAFFOLD_TEMPLATE, {
@@ -42,7 +42,7 @@ export function renderComponentScaffold(options: ComponentScaffoldOptions = {}):
     projectName,
     elementTag,
     label,
-    scopeName,
+    scopeName: JSON.stringify(scopeName).slice(1, -1),
     elementPrefix
   });
 }

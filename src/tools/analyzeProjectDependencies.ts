@@ -6,7 +6,7 @@ export function registerAnalyzeProjectDependencies(server: McpServer) {
   server.tool(
     'analyze_project_dependencies',
     'Analyzes a Next Experience UI component project package.json for platform components that should be declared as optionalDependencies with the version set to "instance". ' +
-      'Use this when an agent plans to use instance-backed platform components with snc ui-component develop --fa or deploy --fa.',
+      'Use this when adding or changing instance-backed platform dependencies, including preparation for eventual deployment with snc ui-component deploy --fa, regardless of the local preview workflow.',
     {
       packageJsonPath: z
         .string()
@@ -57,10 +57,10 @@ export function registerAnalyzeProjectDependencies(server: McpServer) {
 
         lines.push(
           '',
-          'When you rely on platform components that exist on the target instance but not in public npm, declare them in optionalDependencies with version "instance" and use snc ui-component develop --fa or deploy --fa so assets are resolved from the instance.',
+          'When you rely on instance-backed platform components, declare their packages in optionalDependencies with version "instance".',
+          'For eventual deployment to the instance, the user should run snc ui-component deploy --fa so assets are resolved from the instance. Agents must not execute deployment commands.',
           'If you are still deciding whether to build custom UI or compose an HDS component, run evaluate_platform_component_fit before scaffolding.',
-          'For --fa workflows, create src/runtime/ui-core.js and src/runtime/snabbdom.js, then import createCustomElement and the snabbdom renderer through those local shims backed by @servicenow/ui-mega so the ui-component plugin does not auto-inject public npm copies of @servicenow/ui-core or @servicenow/ui-renderer-snabbdom.',
-          'Also keep a dedicated examples component behind example/element.js for local smoke testing; do not treat a direct mount of the production custom element from element.js as the complete local-development scaffold.'
+          'Create src/runtime/ui-core.js and src/runtime/snabbdom.js, then import createCustomElement and the snabbdom renderer through those local shims backed by @servicenow/ui-mega so the ui-component plugin does not auto-inject public npm copies of @servicenow/ui-core or @servicenow/ui-renderer-snabbdom during deployment.'
         );
 
         return { content: [{ type: 'text' as const, text: lines.join('\n') }] };
