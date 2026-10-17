@@ -69,6 +69,25 @@ export function validateNowUiJson(input: unknown): ValidateNowUiJsonResult {
     .map((issue) => normalizeIssue(issue))
     .filter((issue): issue is SchemaValidationIssue => issue !== null && issue.message.length > 0);
 
+  for (const [componentName, component] of Object.entries(components)) {
+    if (!component || typeof component !== 'object' || Array.isArray(component)) {
+      continue;
+    }
+
+    const uiBuilder = (component as Record<string, unknown>).uiBuilder;
+    const tileIcon =
+      uiBuilder && typeof uiBuilder === 'object' && !Array.isArray(uiBuilder)
+        ? (uiBuilder as Record<string, unknown>).tileIcon
+        : undefined;
+    if (typeof tileIcon !== 'string' || tileIcon.trim().length === 0) {
+      issues.push({
+        message: 'Expected a non-empty uiBuilder.tileIcon path; use "./tile-icon/generic-tile-icon.svg" by default.',
+        path: `components.${componentName}.uiBuilder.tileIcon`,
+        component: componentName
+      });
+    }
+  }
+
   const warnings = issues.filter((issue) => (issue.level ?? '').toLowerCase() === 'warning' || (issue.level ?? '').toLowerCase() === 'warn');
   const errors = issues.filter((issue) => !warnings.includes(issue));
 

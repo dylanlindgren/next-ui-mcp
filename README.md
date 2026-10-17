@@ -40,7 +40,7 @@ This MCP server is meant to act as a practical operating system for working with
 
 - **`get_component_api`** — reads the real API of a platform component from the user's own ServiceNow instance, so an agent works from actual props, events, and slots rather than stale or incomplete public package metadata. Slot names come from `sys_ux_macroponent.root_component_definition.availableSlots`, with markup examples showing the `slot` attribute.
 - **`analyze_project_dependencies`** — checks whether a project declares platform packages as `optionalDependencies` with version `"instance"` when needed.
-- **`validate_now_ui_manifest`** — validates a `now-ui.json` file using the ServiceNow schema validation package and reports schema issues.
+- **`validate_now_ui_manifest`** — validates a `now-ui.json` file using the ServiceNow schema validation package and checks that every UI Builder component has a non-empty `tileIcon` path.
 
 ### Using an `snc` profile instead of environment credentials (macOS)
 

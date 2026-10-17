@@ -180,6 +180,7 @@ createCustomElement('{{elementTag}}', {
     "{{elementTag}}": {
       "uiBuilder": {
         "label": "{{label}}",
+        "tileIcon": "./tile-icon/generic-tile-icon.svg",
         "description": "Shows a simple title and status value",
         "category": "primitives",
         "associatedTypes": [
@@ -225,8 +226,9 @@ Rules for agents:
 2. MUST assess existing project configuration before setup or migration. Preserve compatible Storybook configuration, package scripts, lockfiles, existing stories, examples, and unrelated project instructions; make targeted additions instead of replacing files wholesale.
 3. MUST NOT import `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom` directly from the component source; use the local runtime shims. This is a required scaffold rule, not optional cleanup.
 4. MUST keep `createCustomElement(...)` and `now-ui.json` aligned whenever properties or dispatched events change.
-5. MUST use `search_instance_components` and `get_component_api` before building custom UI that might already exist as an HDS component. When a platform primitive like `now-card` exists, prefer it over a custom card implementation.
-6. MUST import the matching package for any HDS component used in JSX, not only `now-card`. Example: `import '@servicenow/now-button';` or `import '@servicenow/now-card';` before rendering the element.
-7. MUST keep component styles in a dedicated `.scss` file per component, import it, and declare it via the `styles` property in `createCustomElement(...)`; do not inline CSS in the view.
-8. MUST NOT use `snc ui-component develop` as the default preview workflow. Do not run `snc ui-component develop` or `deploy` as part of agent scaffolding or validation.
-9. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server. Give the user the preview command to run themselves. Agents may run the static `build-storybook` script for validation.
+5. MUST include `uiBuilder.tileIcon` in every component's `now-ui.json` entry. Use `./tile-icon/generic-tile-icon.svg` by default; it is a project-root-relative path to the generic SVG already present in a newly set-up project. If a component needs a custom tile icon, create its SVG under the project root and use its root-relative `.svg` path.
+6. MUST use `search_instance_components` and `get_component_api` before building custom UI that might already exist as an HDS component. When a platform primitive like `now-card` exists, prefer it over a custom card implementation.
+7. MUST import the matching package for any HDS component used in JSX, not only `now-card`. Example: `import '@servicenow/now-button';` or `import '@servicenow/now-card';` before rendering the element.
+8. MUST keep component styles in a dedicated `.scss` file per component, import it, and declare it via the `styles` property in `createCustomElement(...)`; do not inline CSS in the view.
+9. MUST NOT use `snc ui-component develop` as the default preview workflow. Do not run `snc ui-component develop` or `deploy` as part of agent scaffolding or validation.
+10. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server. Give the user the preview command to run themselves. Agents may run the static `build-storybook` script for validation.

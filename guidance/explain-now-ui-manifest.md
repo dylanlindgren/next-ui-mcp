@@ -8,13 +8,15 @@ now-ui.json is the machine-readable manifest for every custom component in this 
       "<component-directory-name>": {
         "properties": [ { "name", "label", "fieldType", "defaultValue", "description", ... } ],
         "actions":    [ { "name", "label", "description", "payload": [...] } ],
-        "uiBuilder":  { "label", "icon", "description", "category" }
+        "uiBuilder":  { "label", "tileIcon", "description", "category" }
       }
     }
   }
 ```
 
 It is NOT derived automatically from the component's index.js — it is a separate, hand-maintained (or tool-maintained) declaration that other tooling (UI Builder and the platform) reads to know a component's public API, without executing the component's JavaScript.
+
+Every component's `uiBuilder` object must include `tileIcon`. Use the project-root-relative path `./tile-icon/generic-tile-icon.svg` by default; new projects already contain that SVG. If you create a custom tile icon, put the SVG inside the project root and point `tileIcon` to its root-relative `.svg` path.
 
 ## The rule
 

@@ -9,7 +9,8 @@ test('validateNowUiJson accepts a schema-valid manifest', () => {
       'my-scope-demo-card': {
         uiBuilder: {
           label: 'Demo card',
-          description: 'Example component'
+          description: 'Example component',
+          tileIcon: './tile-icon/generic-tile-icon.svg'
         },
         properties: [
           {
@@ -31,6 +32,23 @@ test('validateNowUiJson accepts a schema-valid manifest', () => {
 
   assert.equal(result.valid, true);
   assert.deepEqual(result.errors, []);
+});
+
+test('validateNowUiJson rejects a missing or blank uiBuilder tileIcon', () => {
+  for (const component of [
+    { uiBuilder: { tileIcon: undefined } },
+    { uiBuilder: { tileIcon: '  ' } },
+    {}
+  ]) {
+    const result = validateNowUiJson({
+      components: {
+        'my-scope-demo-card': component
+      }
+    });
+
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.some((issue) => issue.path === 'components.my-scope-demo-card.uiBuilder.tileIcon'));
+  }
 });
 
 test('validateNowUiJson rejects an invalid manifest shape', () => {

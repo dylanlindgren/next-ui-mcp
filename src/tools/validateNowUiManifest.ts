@@ -17,7 +17,7 @@ function parseManifestInput(input: unknown): Record<string, unknown> {
 export function registerValidateNowUiManifest(server: McpServer) {
   server.tool(
     'validate_now_ui_manifest',
-    'Validates a now-ui.json manifest using the ServiceNow component-schema-validation package. Accepts either the raw manifest object or a JSON string. Returns whether the manifest is valid and any AJV/custom schema issues found.',
+    'Validates a now-ui.json manifest using the ServiceNow component-schema-validation package and checks that each uiBuilder object has a non-empty tileIcon path. Accepts either the raw manifest object or a JSON string. Returns whether the manifest is valid and any schema or tileIcon issues found.',
     {
       manifest: z.union([z.record(z.any()), z.string()]).describe('The now-ui.json object or its raw JSON string to validate.')
     },

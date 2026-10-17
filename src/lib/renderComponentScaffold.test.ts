@@ -36,6 +36,7 @@ test('component tags default to the kebab-case scope while preserving the manife
   assert.ok(scaffold.includes("const TAG = 'x-snc-abc123-my-component';"));
   assert.ok(scaffold.includes('"x-snc-abc123-my-component": {'));
   assert.ok(scaffold.includes('"scopeName": "x_snc_abc123"'));
+  assert.ok(scaffold.includes('"tileIcon": "./tile-icon/generic-tile-icon.svg"'));
 });
 
 test('component tags do not duplicate an existing scope prefix', () => {
