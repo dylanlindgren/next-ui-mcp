@@ -11,8 +11,7 @@ configuration, component story, and package scripts shown there. Tell the user
 to start the interactive preview with `pnpm storybook` (or the equivalent
 package-manager script). Agents MUST NOT execute `pnpm storybook`, `storybook
 dev`, or any equivalent command that starts the Storybook development server.
-Starting that server is the user's responsibility. A static preview can be
-created with `pnpm build-storybook`.
+Starting that server is the user's responsibility.
 
 Stories should import the component source so the component registers, then
 render its custom-element tag with representative property args. Keep framework
@@ -41,8 +40,8 @@ Otherwise, guide the project onto `next-ui-storybook` as its default:
    directory.
 3. Add a story for the component being developed. Do not remove or rewrite
    unrelated stories.
-4. Add or preserve `storybook` and `build-storybook` scripts, integrating
-   with existing scripts rather than replacing the package manifest.
+4. Add or preserve the `storybook` script, integrating with existing scripts
+   rather than replacing the package manifest.
 5. Preserve existing examples, `example/element.js`, and any platform CLI
    workflow when the project uses them for another purpose; they are no longer
    the default local preview path.

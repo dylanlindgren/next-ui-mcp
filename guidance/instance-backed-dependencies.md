@@ -25,7 +25,7 @@ Expected shim pattern:
 
 A project that uses `optionalDependencies` with version `instance`, but still imports the framework packages directly and lacks these runtime shim files, is not fully configured.
 
-Agents should not run `snc ui-component develop` or `snc ui-component deploy` themselves to verify this. Their responsibility is to wire the shims and dependencies correctly, then give the user the project's Storybook preview command. Agents MUST NOT start the Storybook development server; the user runs `pnpm storybook` or its equivalent. Agents may run the static `build-storybook` script for validation. Platform deployment remains the user's responsibility.
+Agents should not run `snc ui-component develop` or `snc ui-component deploy` themselves to verify this. Their responsibility is to wire the shims and dependencies correctly, then give the user the project's Storybook preview command. Agents MUST NOT start the Storybook development server; the user runs `pnpm storybook` or its equivalent. Platform deployment remains the user's responsibility.
 
 For eventual deployment to the instance, the user runs
 `snc ui-component deploy --fa` so assets are resolved from the instance.

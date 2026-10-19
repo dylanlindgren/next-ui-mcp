@@ -82,8 +82,7 @@ For new components with no existing repo style, prefer the JSX scaffold and do n
 // package.json (merge these entries into the project manifest)
 {
   "scripts": {
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "storybook dev -p 6006"
   },
   "devDependencies": {
     "@dylanlindgren/next-ui-storybook-addon": "^1.0.0",
@@ -231,4 +230,4 @@ Rules for agents:
 7. MUST import the matching package for any HDS component used in JSX, not only `now-card`. Example: `import '@servicenow/now-button';` or `import '@servicenow/now-card';` before rendering the element.
 8. MUST keep component styles in a dedicated `.scss` file per component, import it, and declare it via the `styles` property in `createCustomElement(...)`; do not inline CSS in the view.
 9. MUST NOT use `snc ui-component develop` as the default preview workflow. Do not run `snc ui-component develop` or `deploy` as part of agent scaffolding or validation.
-10. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server. Give the user the preview command to run themselves. Agents may run the static `build-storybook` script for validation.
+10. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server. Give the user the preview command to run themselves.

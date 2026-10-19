@@ -12,7 +12,7 @@ When using this MCP server to work on a Next Experience UI component project, fo
 8. For a brand-new component with no existing repo style, MUST prefer the JSX scaffold instead of low-level `createElement(...)` calls.
 9. MUST use `next-ui-storybook` with `@dylanlindgren/next-ui-storybook-addon` as the default local development and preview workflow.
 10. MUST inspect a project's package manifest, scripts, Storybook configuration, stories, and local-development instructions before adding or migrating setup. Preserve compatible configuration and existing examples; make targeted changes rather than replacing files wholesale.
-11. MUST add or update a Storybook story when creating or changing a component intended for local preview. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server; give the user the command to run themselves. Agents may run the static `build-storybook` script for validation.
+11. MUST add or update a Storybook story when creating or changing a component intended for local preview. MUST NOT execute `pnpm storybook`, `storybook dev`, or equivalent commands that start the Storybook development server; give the user the command to run themselves.
 12. MUST NOT run `snc ui-component develop` as a substitute for the Storybook preview workflow. MUST NOT run `snc ui-component deploy` or similar deployment commands as part of scaffolding or validation. Leave platform deployment to the user.
 
 Minimum expected tool sequence for scaffolding:

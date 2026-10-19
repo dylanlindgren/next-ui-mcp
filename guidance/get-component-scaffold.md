@@ -15,7 +15,7 @@ The scaffold must include:
 - `src/<component-name>/styles.scss`
 - `.storybook/main.mjs`
 - `stories/<component-name>.stories.js`
-- package scripts for `storybook` and `build-storybook`
+- a package script for `storybook`
 - `now-ui.json`
 
 ## Required rules
@@ -35,8 +35,7 @@ The generated scaffold should configure
 `@dylanlindgren/next-ui-storybook-addon` and
 `@storybook/web-components-vite`, and include a story that imports the
 component source and renders its custom-element tag with representative args.
-The project should be previewable with its `storybook` script and buildable
-with `build-storybook`.
+The project should be previewable with its `storybook` script.
 
 When adding Storybook to an existing project, inspect the package manifest,
 scripts, Storybook config, stories, and instructions first. Preserve compatible

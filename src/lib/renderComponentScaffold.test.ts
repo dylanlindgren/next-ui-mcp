@@ -25,7 +25,6 @@ test('component scaffold uses next-ui-storybook for local preview', () => {
   assert.ok(scaffold.includes('stories/status-card.stories.js'));
   assert.ok(scaffold.includes("const TAG = 'x-test-status-card';"));
   assert.ok(scaffold.includes('"storybook": "storybook dev -p 6006"'));
-  assert.ok(scaffold.includes('"build-storybook": "storybook build"'));
   assert.doesNotMatch(scaffold, /example\/element\.js|src\/examples\/index\.js/);
 });
 
