@@ -25,6 +25,7 @@ test('component scaffold uses next-ui-storybook for local preview', () => {
   assert.ok(scaffold.includes('stories/status-card.stories.js'));
   assert.ok(scaffold.includes("const TAG = 'x-test-status-card';"));
   assert.ok(scaffold.includes('"storybook": "storybook dev -p 6006"'));
+  assert.ok(scaffold.includes('"@servicenow/ui-mega": "instance"'));
   assert.doesNotMatch(scaffold, /example\/element\.js|src\/examples\/index\.js/);
 });
 
@@ -100,5 +101,10 @@ test('framework guidance routes Storybook setup and adoption questions to migrat
     const text = JSON.stringify(response);
     assert.ok(text.includes('@dylanlindgren/next-ui-storybook-addon'));
     assert.ok(text.includes('Do not overwrite custom Storybook configuration'));
+    assert.ok(text.includes('Batch public'));
+    assert.ok(text.includes('not a public npm version'));
+    assert.ok(text.includes('A static Storybook build is not mandatory'));
+    assert.ok(text.includes('unrelated baseline failures'));
+    assert.ok(text.includes('remains unverified'));
   }
 });

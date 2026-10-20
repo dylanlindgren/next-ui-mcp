@@ -17,7 +17,7 @@ type PackageJsonShape = {
 };
 
 function isNowExperiencePackage(name: string): boolean {
-  return name.startsWith('@servicenow/now-') || HDS_PACKAGE_NAMES.has(name);
+  return name === '@servicenow/ui-mega' || name.startsWith('@servicenow/now-') || HDS_PACKAGE_NAMES.has(name);
 }
 
 const HDS_PACKAGE_NAMES = new Set(HDS_COMPONENTS.map((component) => component.packageName));

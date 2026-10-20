@@ -57,6 +57,27 @@ Do not overwrite custom Storybook configuration, package-manager settings, or
 agent instructions. Make the smallest compatible changes and report any
 incompatibility that needs the developer's decision.
 
+## Migration installation and validation
+
+- Preserve the existing package manager, version, and settings. Batch public
+  dependency changes into one install and let it update the lockfile; skip
+  installation if nothing changed and the required packages are installed.
+- `"instance"` is intentional, not a public npm version. Preserve existing
+  instance-backed optional dependencies. Skipped optional packages, warnings,
+  or absent lockfile entries alone are not failures. Do not replace the marker
+  with registry versions or hand-edit, delete, or repeatedly regenerate lockfiles
+  to eliminate them.
+  Investigate actual install failures; report blockers rather than cycling
+  through speculative package-manager changes.
+- Check config syntax (e.g. `node --check .storybook/main.mjs`), story imports,
+  registered tags, dependency declarations, and existing focused checks.
+  A static Storybook build is not mandatory; run it only when requested or
+  required by the project's workflow and its prerequisites are available.
+- Fix migration regressions, but report unrelated baseline failures such as
+  missing legacy test tooling (`@babel/core`) rather than repairing them solely
+  for Storybook adoption. State what passed, failed, and remains unverified;
+  static checks do not prove the instance-backed preview works.
+
 ## Instance credentials
 
 Instance credentials are the user's responsibility. Assume the user already

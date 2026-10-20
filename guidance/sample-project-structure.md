@@ -148,6 +148,7 @@ export const Default = {};
 // package.json
 {
   "optionalDependencies": {
+    "@servicenow/ui-mega": "instance",
     "@servicenow/now-card": "instance"
   }
 }

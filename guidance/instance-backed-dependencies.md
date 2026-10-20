@@ -18,6 +18,9 @@ All components should use local shims for `@servicenow/ui-core` and `@servicenow
 
 Expected shim pattern:
 
+Declare `@servicenow/ui-mega` in `optionalDependencies` with version `"instance"`
+because the runtime shims import it, regardless of the local preview workflow.
+
 1. Create `src/runtime/ui-core.js` and re-export `createCustomElement` from `@servicenow/ui-mega`.
 2. Create `src/runtime/snabbdom.js` and re-export `createElement` and the default renderer from `@servicenow/ui-mega`.
 3. Update component source to import from those local runtime files instead of directly from `@servicenow/ui-core` or `@servicenow/ui-renderer-snabbdom`.
