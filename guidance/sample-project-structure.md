@@ -88,6 +88,7 @@ For new components with no existing repo style, prefer the JSX scaffold and do n
     "@dylanlindgren/next-ui-storybook-addon": "^1.0.0",
     "@storybook/web-components-vite": "^10.6.2",
     "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "sass": "1.53.0",
     "storybook": "^10.6.2",
     "vite": "^7.3.6"
