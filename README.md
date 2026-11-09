@@ -1,84 +1,83 @@
-# next-ui-mcp
+# Next UI MCP
 
-An MCP server for helping AI coding agents build, evaluate, and validate ServiceNow **Next Experience UI Framework** components and projects more effectively.
+[English](README.md) | [日本語](README.ja.md)
 
-> Unofficial, community-maintained project. Not affiliated with, endorsed by, or supported by ServiceNow.
+Next UI MCP is an MCP server that helps AI coding assistants build and check projects using ServiceNow's Now/Next Experience UI Framework.
 
-## Why
+It provides framework guidance, component scaffolds, and tools for finding and inspecting components from your ServiceNow instance.
 
-Next Experience UI Framework components have two parts that must stay in sync: the component source (`src/<name>/index.js`) and the separate manifest (`now-ui.json`) that declares the component's public properties and dispatched events. AI agents (and humans) routinely edit one without updating the other. That is one important problem this server solves.
+> This is an unofficial, community-maintained project. It is not affiliated with, endorsed by, or supported by ServiceNow.
 
-But the broader goal is to make AI-assisted development in this framework safer and more reliable across the full workflow:
+## Quick start
 
-- understand the framework contract and `now-ui.json` rules
-- generate a correct component scaffold from the start
-- prefer real platform components before inventing custom UI
-- choose between direct use, composition, and custom implementation with evidence
-- validate manifests and dependency setup
-- inspect live instance API metadata instead of guessing from stale package docs
-- use `next-ui-storybook` as the default local preview workflow, alongside runtime shims and instance-backed `optionalDependencies`
-- reduce the common failure modes that cause AI-generated Next Experience UI Framework code to be structurally wrong or platform-incompatible
+You need Node.js 18.20 or newer and an MCP-compatible coding assistant.
 
-This MCP server is meant to act as a practical operating system for working with Next Experience UI Framework projects in AI-assisted development, with manifest sync as one critical piece of that larger workflow.
-## Available MCP tools
+Add this server to your assistant's MCP configuration. For example, use `.mcp.json` for Claude Code or `.cursor/mcp.json` for Cursor:
 
-### Guidance and scaffolding
-
-- **`explain_now_ui_manifest`** — explains what `now-ui.json` is and how to keep it in sync with the component code.
-- **`get_framework_guidance`** — returns bundled guidance for framework patterns, sample project structure, `createCustomElement(...)`, manifest expectations, Storybook local development and migration, and instance-backed dependency usage. Use topic `storybook-local-development` for setup and adoption guidance.
-- **`get_component_scaffold`** — returns the minimal stub files for a new component, including `createCustomElement(...)`, `.storybook/main.mjs`, a component story, and a matching `now-ui.json` entry.
-
-### Platform component selection
-
-- **`evaluate_platform_component_fit`** — decides whether an instance-backed HDS component should be used directly, wrapped/composed, or replaced with a custom implementation before scaffolding from scratch.
-- **`search_instance_components`** — discovers which platform components exist on the configured instance.
-- **`search_instance_icons`** — searches the icon library on the configured instance (the values accepted by `icon` properties such as `now-button`'s) so agents pick real icon names instead of guessing. Names are read from the instance's `now-icon` package; append `-outline` or `-fill` to use one.
-- **`recommend_instance_components`** — finds likely platform-component matches from a use case or desired properties/events.
-- **`resolve_component_package`** — resolves a platform component tag to the exact npm package it belongs to without guessing.
-
-### Instance API and validation
-
-- **`get_component_api`** — reads the real API of a platform component from the user's own ServiceNow instance, so an agent works from actual props, events, and slots rather than stale or incomplete public package metadata. Slot names come from `sys_ux_macroponent.root_component_definition.availableSlots`, with markup examples showing the `slot` attribute.
-- **`analyze_project_dependencies`** — checks whether a project declares platform packages as `optionalDependencies` with version `"instance"` when needed.
-- **`validate_now_ui_manifest`** — validates a `now-ui.json` file using the ServiceNow schema validation package and checks that every UI Builder component has a non-empty `tileIcon` path.
-
-### Using an `snc` profile instead of environment credentials (macOS)
-
-If `NEXT_UI_INSTANCE_URL` is not set, the server falls back to an `snc configure profile` profile. Set `NEXT_UI_SNC_PROFILE` to pick one (default: `default`). The host and username are read from `~/.snc/config.json` and the password from the macOS Keychain (service `snc`, account = profile name), so no secret has to be stored in your MCP client config. Only `basic` login-method profiles are supported.
-
-```json
-"env": { "NEXT_UI_SNC_PROFILE": "default" }
-```
-
-## Install
-
-Add to your MCP client config (for example, `.mcp.json` at your project root for Claude Code or `.cursor/mcp.json` for Cursor):
+On macOS, first configure a basic-auth profile with `snc configure profile`. The server uses the `default` profile automatically.
 
 ```json
 {
   "mcpServers": {
     "next-ui": {
       "command": "npx",
-      "args": ["-y", "next-ui-mcp@latest"],
-      "env": {
-        "NEXT_UI_INSTANCE_URL": "https://your-instance.service-now.com",
-        "NEXT_UI_INSTANCE_USER": "your-user",
-        "NEXT_UI_INSTANCE_PASSWORD": "your-password"
-      }
+      "args": ["-y", "next-ui-mcp@latest"]
     }
   }
 }
 ```
 
-Ensure the file is added to your `.gitignore` since it contains credentials.
+The server reads the profile's host and username from `~/.snc/config.json` and its password from the macOS Keychain. No credentials need to be added to your project configuration. If you use a profile other than `default`, set `NEXT_UI_SNC_PROFILE` in the server's `env` configuration.
 
-Instance requests time out after 20 seconds by default. Set `NEXT_UI_INSTANCE_TIMEOUT_MS` in the same `env` block to raise or lower that if your instance is slow or you want to fail faster.
+Restart or refresh your coding assistant after updating its MCP configuration. The tools should then be available in your project.
 
-### Configure project instructions
+## What your agent can do
 
-Connecting the server makes its tools available, but project instructions tell the agent when to use them. Add these files to the consuming UI project's root, and commit them so the team shares the same policy.
+### Learn the framework and create a component
 
-Keep the shared instructions in `AGENTS.md`:
+- `get_framework_guidance` — get guidance on framework topics, project structure, Storybook, manifests, and component development.
+- `get_component_scaffold` — generate starter files for a component.
+- `explain_now_ui_manifest` — learn how `now-ui.json` relates to components.
+
+### Find and inspect platform components
+
+- `recommend_instance_components` — find platform components that may fit a use case.
+- `search_instance_components` — search components available on your instance.
+- `search_instance_icons` — find icon names available on your instance.
+- `evaluate_platform_component_fit` — decide whether to use a platform component, compose it, or build a custom component.
+- `get_component_api` — inspect a component's properties, events, and slots from your instance.
+- `resolve_component_package` — find the npm package for a platform component.
+
+### Check a project
+
+- `validate_now_ui_manifest` — validate a `now-ui.json` manifest.
+- `analyze_project_dependencies` — check platform package declarations in `package.json`.
+
+## Connect to a ServiceNow instance
+
+Instance credentials enable tools that look up live component and icon information. Choose one of these three options:
+
+### 1. Use an `snc` profile (macOS)
+
+Configure a basic-auth profile with `snc configure profile`. Leave `NEXT_UI_INSTANCE_URL` unset; the server uses the `default` profile. To use another profile, set `NEXT_UI_SNC_PROFILE` to its name. The host and username are read from `~/.snc/config.json`, and the password is read from the macOS Keychain.
+
+### 2. Use a username and password
+
+Set these variables in the MCP server's `env` configuration:
+
+- `NEXT_UI_INSTANCE_URL`
+- `NEXT_UI_INSTANCE_USER`
+- `NEXT_UI_INSTANCE_PASSWORD`
+
+### 3. Use a bearer token
+
+Set `NEXT_UI_INSTANCE_URL` and `NEXT_UI_INSTANCE_TOKEN` in the MCP server's `env` configuration. The token is sent as a bearer token. If both a token and username/password are set, the token takes precedence.
+
+Instance requests time out after 20 seconds by default. Set `NEXT_UI_INSTANCE_TIMEOUT_MS` in the server's `env` configuration to change the timeout.
+
+## Help your assistant follow the project workflow
+
+MCP configuration connects the server; project instructions help your assistant use its tools at the right time. Add a root-level `AGENTS.md` (or your assistant's equivalent project-instructions file), or merge the guidance into an existing file. For example:
 
 ```markdown
 # ServiceNow UI Development
@@ -92,6 +91,7 @@ Custom UI requires a concrete functional or design gap.
 ## Required Workflow
 
 For new UI and substantial changes to existing UI:
+
 - Before implementation, use next-ui-mcp get_framework_guidance
   with topic "agent-workflow-contract" and follow its guidance.
 - Discover HDS candidates using recommend_instance_components
@@ -104,38 +104,32 @@ For new UI and substantial changes to existing UI:
   Do not interpret failed discovery as proof that no HDS component exists.
 ```
 
-Adjust the HDS policy to match the project:
+Configure the MCP server separately in each coding assistant. Instructions do not connect the server, and they guide the assistant but cannot guarantee it will follow them.
 
-- **Strict:** Use suitable HDS components; custom equivalents require a concrete capability gap.
-- **Preferred:** Start with HDS; allow custom UI for documented functional or design requirements. This is the template's default.
-- **Selective:** Specify which controls or areas must use HDS and where custom UI is acceptable. Keep that scope consistent with the required workflow.
+## Demo
 
-For **Copilot in VS Code**, enable `chat.useAgentsMdFile` for the Local agent. Start a new chat and confirm `AGENTS.md` is discovered in **Chat: Open Customizations** and included in the response's References or instruction diagnostics. Merge this guidance with any existing project instructions instead of adding conflicting policies.
-
-For **Claude Code**, add a root `CLAUDE.md` containing this import as a plain Markdown line, not inside a code fence:
-
-```markdown
-@AGENTS.md
-```
-
-Claude Code expands the import automatically, keeping `AGENTS.md` as the single source of shared instructions. Recent versions can also load `AGENTS.md` directly, but the import supports older versions and sessions configured to load only `CLAUDE.md`. If `CLAUDE.md` already exists, add the import and preserve its existing instructions. Start a new session and use `/context` to confirm the project instructions loaded.
-
-Configure and enable the MCP server separately in each client; instruction files do not connect it. Choosing a Claude model inside Copilot still uses Copilot's instruction loading, not Claude Code's.
-
-To check the workflow, ask the agent to add a card containing a button. Verify that it calls component-discovery and API-inspection tools before implementing the UI. Instructions guide behavior but do not guarantee compliance.
-
-## Development
-
-```bash
-npm install
-npm run build   # compile TypeScript -> dist/
-npm run dev     # run directly from src/ via tsx, for local iteration
-```
+[![Watch the demo](https://img.youtube.com/vi/D9xCnDnverw/maxresdefault.jpg)](https://www.youtube.com/watch?v=D9xCnDnverw)
 
 ## Contributing
 
-PRs adding improvements to the guidance and instance-backed component discovery flow, are the main way this stays useful and current as the framework evolves. This project is meant to be centrally maintained in one place rather than copied into every project.
+Contributions to the framework guidance and instance-backed component discovery are welcome.
+
+### Set up the project
+
+These steps are for contributors working on the source code. You do not need them to install or use the MCP server.
+
+```bash
+pnpm install
+pnpm run build
+pnpm test
+```
+
+To run the server from source during development:
+
+```bash
+pnpm run dev
+```
 
 ## License
 
-MIT
+[MIT](./LICENSE)
