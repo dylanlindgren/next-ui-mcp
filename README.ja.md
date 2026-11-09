@@ -39,6 +39,8 @@ MCP 設定を変更したら、コーディングアシスタントを再起動�
 - `get_component_scaffold` — コンポーネントのひな形ファイルを生成します。
 - `explain_now_ui_manifest` — `now-ui.json` とコンポーネントの関係を確認します。
 
+Storybook のガイダンスとひな形は、ローカルでのコンポーネント開発とプレビューに [next-ui-storybook](https://github.com/dylanlindgren/next-ui-storybook) を使用します。
+
 ### プラットフォームコンポーネントを検索・確認する
 
 - `recommend_instance_components` — 用途に合う可能性のあるプラットフォームコンポーネントを探します。

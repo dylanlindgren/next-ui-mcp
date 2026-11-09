@@ -39,6 +39,8 @@ Restart or refresh your coding assistant after updating its MCP configuration. T
 - `get_component_scaffold` — generate starter files for a component.
 - `explain_now_ui_manifest` — learn how `now-ui.json` relates to components.
 
+The Storybook guidance and scaffolds use [next-ui-storybook](https://github.com/dylanlindgren/next-ui-storybook) for local component development and preview.
+
 ### Find and inspect platform components
 
 - `recommend_instance_components` — find platform components that may fit a use case.
